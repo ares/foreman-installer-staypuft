@@ -17,11 +17,11 @@ class sshkeypair($user='foreman-proxy', $group='foreman-proxy', $home='/etc/fore
           owner  => $user,
           group  => $group,
           mode   => '0600',
-        }
-
+          require => Package['foreman-proxy'],
+        } ->
         # Generate SSH keypair for foreman-proxy user
         ssh_keygen { $user:
-          home => $home
+          home => $home,
         }
 }
 include 'sshkeypair'
