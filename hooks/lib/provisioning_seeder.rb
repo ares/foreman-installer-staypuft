@@ -139,7 +139,7 @@ class ProvisioningSeeder < BaseSeeder
     ptable = @foreman.partition_table.first! %Q(name ~ "#{ptable_name}*")
     if os['ptables'].nil? || os['ptables'].empty?
       ids = @foreman.partition_table.show!('id' => ptable['id'])['operatingsystems'].map {|o| o['id']}
-      @foreman.partition_table.update 'id' => ptable['id'], 'ptable' => {'operatingsystem_ids' => [ids + os['id']].uniq}
+      @foreman.partition_table.update 'id' => ptable['id'], 'ptable' => {'operatingsystem_ids' => (ids + [os['id']]).uniq}
     end
     ptable
   end
