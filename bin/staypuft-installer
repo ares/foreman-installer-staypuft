@@ -1,47 +1,45 @@
 #!/usr/bin/env ruby
+require 'rubygems'
+require 'highline/import'
 
 # set the hostname before we call kafo
 # kafo collects the facts for a system and we can't change them within
 # a run once it's been started. Apache and Bind use the facts
 # to be configured so the fqdn needs to be correct before we start.
 
-puts "Current fqdn: #{`facter -p fqdn`}"
-puts "Current ip address: #{`facter -p ipaddress`}"
-begin
-  puts "You you like to update these before you continue? (y/n)"
-  conf_hostname = gets.chomp
-end while not ['y','n'].include? conf_hostname
+just = 20
+change = true
+orig_fqdn = new_fqdn = `facter -p fqdn`.chomp
+orig_ip = new_ip = `facter -p ipaddress`.chomp
+while change
+  say "Current fqdn: ".ljust(just) + new_fqdn
+  say "Current ip address: ".ljust(just) + new_ip
 
-if conf_hostname == 'y'
-  puts "Enter the new fqdn:"
-  new_fqdn = gets
-  puts "Enter the new ipaddress"
-  new_ip = gets
+  if (change = agree("Would you like to update these before you continue? (y/n)"))
+    new_fqdn = ask("Enter the new fqdn:") { |q| q.default = new_fqdn }
+    new_ip = ask("Enter the new ipaddress:") { |q| q.default = new_ip }
+  end
+end
 
+if orig_fqdn != new_fqdn || orig_ip != new_ip
   command = %Q(puppet apply --modulepath /usr/share/foreman-installer/modules/ -e "class {"foreman::plugin::staypuft_host":
-      base_url => '#{new_fqdn}',
-      ip       => '#{new_ip}',
-    }")
-  #command.append '2>&1'
+      fqdn => '#{new_fqdn}',
+      ip   => '#{new_ip}',
+    }" > /dev/null 2>&1)
 
-  puts 'Starting networking setup'
-  puts `#{command}`
+  say 'Setting hostname'
+  say `#{command}`
 
   if $?.success?
-    puts 'Networking setup has finished'
+    say 'Hostname setup has finished'
   else
-    puts 'error'
+    say 'Hostname was not set correctly, can not continue.'
     exit(1)
-    #kafo.class.exit(101)
   end
-
-gets
 end
 
 # Now that the hostname is set we can move forward
 
-require 'rubygems'
-require 'highline/import'
 require 'yaml'
 require 'kafo'
 

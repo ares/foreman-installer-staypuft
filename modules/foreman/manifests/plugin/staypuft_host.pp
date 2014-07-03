@@ -2,21 +2,9 @@
 #
 # === Parameters:
 #
-# $interface::            Which interface should this class configure
+# $fqdn::                  FQDN of a host to configure
 #
-# $ip::                   What IP address should be set
-#
-# $netmask::              What netmask should be set
-#
-# $gateway::              What is the gateway for this machine
-#
-# $dns::                  DNS forwarder to use as secondary nameserver
-#
-# $configure_networking:: Should we modify networking?
-#                         type:boolean
-#
-# $configure_firewall::   Should we modify firewall?
-#                         type:boolean
+# $ip::                  IP address matching the FQDN
 #
 class foreman::plugin::staypuft_host(
     $fqdn,
